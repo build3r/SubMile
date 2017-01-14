@@ -156,8 +156,8 @@
                             android:padding="5dp"
                             android:textColor="#ffffff"
                             android:textColorLink="@color/colorPrimaryDark"
-                            android:textOff="Stop"
-                            android:textOn="Draw"/>
+                            android:textOff="Draw"
+                            android:textOn="Stop"/>
 
                         <!--android:background="@drawable/style_toggle_btn"-->
                     </FrameLayout>

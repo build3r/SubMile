@@ -25,6 +25,6 @@ public class MApp extends Application
     }
     public static boolean whoAmI()
     {
-        return CUSTOMER;
+        return DRIVER;
     }
 }

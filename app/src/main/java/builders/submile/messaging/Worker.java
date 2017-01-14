@@ -3,7 +3,6 @@ package builders.submile.messaging;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.quickblox.auth.QBAuth;
 import com.quickblox.auth.model.QBSession;
 import com.quickblox.chat.QBChatService;
@@ -26,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import builders.submile.MainActivity;
-import builders.submile.customerDraw;
+import builders.submile.MessageData;
 import builders.submile.gsonUtil;
 
 /**
@@ -84,20 +83,35 @@ public class Worker {
         public void processMessage(QBPrivateChat privateChat, final QBChatMessage chatMessage) {
 
             Log.d(tag, "Chat Listener : " + chatMessage.getBody().toString());
+
+            MessageData d = (MessageData) gsonUtil.tojava(chatMessage.getBody(), MessageData.class);
             if(MApp.whoAmI()==MApp.CUSTOMER)
             {
                 // customer logic
+                switch (d.TYPE)
+                {
+                    case "ENTERED":
+                        break;
+                    case "CURRENT_LOCATION":
+                        activity.updatePilotLocation(d.ltlng.get(0));
+                        break;
+                }
 
-                LatLng l = (LatLng) gsonUtil.tojava(chatMessage.getBody().toString(), LatLng.class);
 
-                activity.updatePilotLocation(l);
             }
             else
             {
-                // pilot logic
+                // driver logic
+                switch (d.TYPE)
+                {
+                    case "RESET":
+                        activity.resetMAP();
+                        break;
+                    case "DRAW":
+                        activity.Draw_MapOnPilot(d.ltlng);
+                        break;
+                }
 
-                customerDraw d = (customerDraw) gsonUtil.tojava(chatMessage.getBody(), customerDraw.class);
-                activity.Draw_MapOnPilot(d.ltlng);
             }
         }
 

@@ -1,4 +1,5 @@
 package builders.submile;
+
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -12,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -26,6 +28,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -36,11 +39,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import builders.submile.messaging.MApp;
 import builders.submile.messaging.Worker;
 
+import static com.google.android.gms.location.LocationServices.FusedLocationApi;
+
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, LocationListener
 {
     final static String tag = MainActivity.class.getSimpleName();
     Boolean Is_MAP_Moveable = true; // to detect map is movable
-    Button btn_draw_State,customerCall;
+    Button btn_draw_State, customerCall;
+    ImageButton reset;
     FrameLayout fram_map;
     Projection projection;
     double latitude, longitude;
@@ -49,8 +55,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     Worker w;
     int c = 0;
     PolylineOptions rectOptions;
-    MarkerOptions pilotMarker;
-    LatLng pilotLocation ;
+    MarkerOptions pilotMarkerOptions;
+    LatLng pilotLocation;
     ScheduledExecutorService worker = Executors.newScheduledThreadPool(1);
     /**
      * Manipulates the map once available.
@@ -61,10 +67,12 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
-    MarkerOptions customerMarker;
+    MarkerOptions customerMarkerOptions, driverMarkerOptions;
+    Marker customerMarker, driverMarker,pilotMarker;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     LinearLayout container;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -74,11 +82,22 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         w = Worker.getWorker(this);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
 
+        val = new ArrayList<>();
         if (MApp.whoAmI() == MApp.CUSTOMER)
         {
-            getLayoutInflater().inflate(R.layout.customer_layout,container);
+            getLayoutInflater().inflate(R.layout.customer_layout, container);
             w.loginAsCustomer();
             customerCall = (Button) findViewById(R.id.customer_call);
+            reset = (ImageButton) findViewById(R.id.reset_id);
+            reset.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+
+                    sendData(new MessageData("RESET", null));
+                }
+            });
             fram_map = (FrameLayout) findViewById(R.id.fram_map);
             btn_draw_State = (Button) findViewById(R.id.btn_draw_State);
             ((View) btn_draw_State.getParent()).setOnTouchListener(new View.OnTouchListener()
@@ -90,7 +109,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     return false;
                 }
             });
-            val = new ArrayList<>();
             btn_draw_State.setOnClickListener(new View.OnClickListener()
             {
                 @Override
@@ -148,7 +166,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                                 // finger leaves the screen
                                 Log.d(tag, "Count = " + c);
                                 Draw_Map(tempval);
-                                sendData(new customerDraw(tempval));
+                                sendData(new MessageData("DRAW", tempval));
                                 tempval.clear();
                                 break;
                         }
@@ -161,7 +179,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         } else
         {
-            getLayoutInflater().inflate(R.layout.driver_layout,container);
+            getLayoutInflater().inflate(R.layout.driver_layout, container);
             w.loginAsPilot();
         }
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -169,7 +187,6 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
         this.buildGoogleApiClient();
         mGoogleApiClient.connect();
-
         mapFragment.getMapAsync(this);
     }
 
@@ -193,7 +210,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    public void sendData(customerDraw d)
+    public void sendData(MessageData d)
     {
         String s = gsonUtil.tojson(d);
         w.sendMessageToPilot(s);
@@ -228,24 +245,26 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void run()
             {
-                if (pilotMarker == null )
+                if (pilotMarkerOptions == null)
                 {
-                    if( ltlng!=null && mMap!=null)
+                    if (ltlng != null && mMap != null)
                     {
                         Log.d(tag, "Creating a new PilotMarker");
-                        pilotMarker = new MarkerOptions().position(ltlng).title("Gojek Ground Pilot").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher));
-                        mMap.addMarker(pilotMarker);
+                        pilotMarkerOptions = new MarkerOptions().position(ltlng).title("Gojek Ground Pilot").icon(BitmapDescriptorFactory.fromResource(R.mipmap.driver_marker));
+                        pilotMarker = mMap.addMarker(pilotMarkerOptions);
                         LatLngBounds.Builder builder = new LatLngBounds.Builder();
                         builder.include(ltlng);
                         builder.include(currentLocation);
                         LatLngBounds bounds = builder.build();
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds,150));/*
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150));/*
                         mMap.moveCamera(CameraUpdateFactory.zoomBy(15));*/
                     }
+                } else
+                {
+                    pilotMarker.setPosition(ltlng);
+
                 }
-                else
-                    pilotMarker.position(ltlng);
-                Log.d(tag,"Current pilotLocation = "+ltlng.toString());
+                Log.d(tag, "Current pilotLocation = " + ltlng.toString());
             }
         });
 
@@ -255,6 +274,39 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap)
     {
         mMap = googleMap;
+        mMap.setMyLocationEnabled(true);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        LatLng t;
+        if(location == null)
+        {
+
+                t = currentLocation;
+        }
+        else
+           t = new LatLng(location.getLatitude(), location.getLongitude());
+        if(MApp.CUSTOMER == MApp.whoAmI())
+        {
+            customerMarkerOptions = new MarkerOptions().position(t).title("Mr Shabaz Ahmed").icon(BitmapDescriptorFactory.fromResource(R.mipmap.customer_marker));
+            customerMarker = mMap.addMarker(customerMarkerOptions);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(t, 15f));
+        }
+        else
+        {
+            customerMarkerOptions = new MarkerOptions().position(new LatLng(12.959399, 77.643374)).title("Mr Shabaz Ahmed").icon(BitmapDescriptorFactory.fromResource(R.mipmap.customer_marker));
+            customerMarker =  mMap.addMarker(customerMarkerOptions);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(12.959399, 77.643374), 16f));
+        }
 
 
     }
@@ -274,7 +326,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
     @Override
@@ -286,13 +338,21 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationRequest createLocationRequest()
     {
         LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setInterval(1000);
+        mLocationRequest.setFastestInterval(1000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         return mLocationRequest;
     }
 
-    LatLng currentLocation = new LatLng(12.9043315,77.630193);
+    LatLng currentLocation = new LatLng(12.959977, 77.644028);
+
+    @Override
+    protected void onStop()
+    {
+        super.onStop();
+
+    }
+
     @Override
     public void onLocationChanged(Location location)
     {
@@ -301,53 +361,70 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         // Add a marker in Sydney and move the camera
         if (MApp.whoAmI() == MApp.CUSTOMER)
         {
-            if (customerMarker == null)
+         /*   if (customerMarkerOptions == null)
             {
-                customerMarker = new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("Mr Shabaz Ahmed").icon(BitmapDescriptorFactory.fromResource(R.mipmap.customer_marker));
-                mMap.addMarker(customerMarker);
+                customerMarkerOptions = new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("Mr Shabaz Ahmed").icon(BitmapDescriptorFactory.fromResource(R.mipmap.customer_marker));
+                mMap.addMarker(customerMarkerOptions);
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15f));
             }
             else
-                customerMarker.position(new LatLng(location.getLatitude(), location.getLongitude()));
+                customerMarkerOptions.position(new LatLng(location.getLatitude(), location.getLongitude()));*/
         } else
         {
-            if (customerMarker == null)
+
+            sendCurrentLocation(new LatLng(location.getLatitude() , location.getLongitude()));
+            if (driverMarkerOptions == null)
             {
                 if(mMap!=null)
 
                 {
-                    customerMarker = new MarkerOptions().position(new LatLng(location.getLatitude() + 0.0125215, location.getLongitude() - 0.002034)).title("Gojek Ground Pilot").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher));
-                    mMap.addMarker(customerMarker);
+                    driverMarkerOptions = new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("Driver").icon(BitmapDescriptorFactory.fromResource(R.mipmap.driver_marker));
+                    driverMarker = mMap.addMarker(driverMarkerOptions);
 
-                    mMap.addMarker(new MarkerOptions().position(currentLocation).title("Mr Shabaz Ahmed").icon(BitmapDescriptorFactory.fromResource(R.mipmap.customer_marker)));
                 }
             }
             else
             {
-                if(i==0)
+                driverMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+/*                if(i==0)
                 {
                     i=1;
                     LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                    builder.include(new LatLng(location.getLatitude() + 0.0125215, location.getLongitude() - 0.002034));
+                    builder.include(new LatLng(location.getLatitude(), location.getLongitude()));
                     builder.include(currentLocation);
                     LatLngBounds bounds = builder.build();
                     mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150));
                 }
-                customerMarker.position(new LatLng(location.getLatitude(), location.getLongitude()));
+                customerMarkerOptions.position(new LatLng(location.getLatitude(), location.getLongitude()));*/
             }
         }
 
-        if (MApp.whoAmI() == MApp.DRIVER)
-            sendCurrentLocation(new LatLng(location.getLatitude()+0.0125215, location.getLongitude()-0.002034));
     }
     int i=0;
 
     public void sendCurrentLocation(final LatLng l)
     {
-        String s = gsonUtil.tojson(l);
+        ArrayList<LatLng> t = new ArrayList<LatLng>();
+        t.add(l);
+        MessageData d = new MessageData("CURRENT_LOCATION",t);
+        String s = gsonUtil.tojson(d);
         Log.d(tag, "Sending Locations Updates In 5 second delays");
         w.sendMessageToCustomer(s);
     }
 
 
+    public void resetMAP()
+    {
+        runOnUiThread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+
+                mMap.addPolyline(new PolylineOptions());
+                val.clear();
+            }
+        });
+
+    }
 }
