@@ -1,6 +1,4 @@
-/**
- * Created by sarvesh on 21-09-2015.
- */
+
 package builders.submile;
 import android.content.Context;
 import android.graphics.Canvas;
