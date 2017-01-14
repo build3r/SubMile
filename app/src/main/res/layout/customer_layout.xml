@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#2196f3"
+        android:layout_weight="1">
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="#2196f3"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/name_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="3dp"
+                    android:text="Shabaz Ahmed"
+                    android:textColor="#ffffff"
+                    android:textSize="20sp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_weight="47.89"
+                android:background="#2196f3"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="3dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="3dp"
+                        android:src="@drawable/phone"
+                        />
+
+                    <TextView
+                        android:id="@+id/mobile_no_id"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="1dp"
+                        android:text="9972115447"
+                        android:textColor="#ffffff"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="3dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:layout_gravity="center"
+                        android:layout_marginRight="3dp"
+                        android:src="@drawable/bike"
+                        android:visibility="visible"/>
+
+                    <TextView
+                        android:id="@+id/vehicle_no_id"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="Bike Delivery"
+                        android:textColor="#ffffff"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_gravity="center_horizontal|bottom"
+                android:background="@android:color/darker_gray"/>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="507dp"
+                android:layout_weight="34.66">
+
+                <FrameLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent">
+
+                    <fragment
+                        android:id="@+id/map"
+                        class="com.google.android.gms.maps.SupportMapFragment"
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"/>
+
+                    <FrameLayout
+                        android:id="@+id/fram_map"
+                        android:layout_width="fill_parent"
+                        android:layout_height="match_parent">
+
+                        <ImageButton
+                            android:id="@+id/reset_id"
+                            android:layout_width="52dp"
+                            android:layout_height="52dp"
+                            android:layout_gravity="left|bottom"
+                            android:layout_margin="10dp"
+                            android:layout_marginLeft="15dp"
+                            android:background="@drawable/reset"/>
+
+                        <ImageButton
+                            android:id="@+id/undo_id"
+                            android:layout_width="52dp"
+                            android:layout_height="52dp"
+                            android:layout_gravity="right|bottom"
+                            android:layout_margin="10dp"
+                            android:layout_marginLeft="15dp"
+                            android:background="@drawable/undo"/>
+
+                        <ToggleButton
+                            android:id="@+id/btn_draw_State"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal|bottom"
+                            android:layout_margin="10dp"
+                            android:background="@drawable/rounded_button"
+                            android:padding="5dp"
+                            android:textColor="#ffffff"
+                            android:textColorLink="@color/colorPrimaryDark"
+                            android:textOff="Stop"
+                            android:textOn="Draw"/>
+
+                        <!--android:background="@drawable/style_toggle_btn"-->
+                    </FrameLayout>
+
+                </FrameLayout>
+            </LinearLayout>
+        </LinearLayout>
+        <ImageView
+            android:id="@+id/driver_picture"
+            android:layout_marginTop="35dp"
+
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/driver" />
+    </FrameLayout>
+
+    <!--<fragment
+         android:layout_width="match_parent"
+        android:layout_height="match_parent" android:id="@+id/map" tools:context=".MapsActivity"
+        android:name="com.google.android.gms.maps.SupportMapFragment" />-->
+<Button
+    android:id="@+id/customer_call"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#2196f3"
+    android:textColor="#FFFFFF"
+    android:text="Call"/>
+</LinearLayout>

@@ -12,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -39,7 +40,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
 {
     final static String tag = MainActivity.class.getSimpleName();
     Boolean Is_MAP_Moveable = true; // to detect map is movable
-    Button btn_draw_State;
+    Button btn_draw_State,customerCall;
     FrameLayout fram_map;
     Projection projection;
     double latitude, longitude;
@@ -63,121 +64,113 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     MarkerOptions customerMarker;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
-
+    LinearLayout container;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        container = (LinearLayout) findViewById(R.id.container);
         w = Worker.getWorker(this);
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+
         if (MApp.whoAmI() == MApp.CUSTOMER)
         {
-
+            getLayoutInflater().inflate(R.layout.customer_layout,container);
             w.loginAsCustomer();
-        } else
-        {
-            w.loginAsPilot();
-        }
-        this.buildGoogleApiClient();
-        mGoogleApiClient.connect();
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        fram_map = (FrameLayout) findViewById(R.id.fram_map);
-        btn_draw_State = (Button) findViewById(R.id.btn_draw_State);
-        ((View) btn_draw_State.getParent()).setOnTouchListener(new View.OnTouchListener()
-        {
-            @Override
-            public boolean onTouch(View v, MotionEvent event)
-            {
-                Log.d("Frame", "Touched");
-                return false;
-            }
-        });
-        val = new ArrayList<>();
-        btn_draw_State.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                // TODO Auto-generated method stub
-                if (Is_MAP_Moveable != true)
-                {
-                    Is_MAP_Moveable = true;
-                } else
-                {
-                    Is_MAP_Moveable = false;
-                }
-            }
-        });
-        fram_map.setOnTouchListener(new View.OnTouchListener()
-        {
-            @Override
-            public boolean onTouch(View v, MotionEvent event)
-            {
-                if (Is_MAP_Moveable == true)
-                {
-                    return false;
-
-                } else
-                {
-
-                    float x = event.getX();
-                    float y = event.getY();
-
-                    int x_co = Math.round(x);
-                    int y_co = Math.round(y);
-
-                    projection = mMap.getProjection();
-                    Point x_y_points = new Point(x_co, y_co);
-
-                    LatLng latLng = mMap.getProjection().fromScreenLocation(x_y_points);
-                    latitude = latLng.latitude;
-
-                    longitude = latLng.longitude;
-
-                    int eventaction = event.getAction();
-                    c++;
-                    switch (eventaction)
-                    {
-                        case MotionEvent.ACTION_DOWN:
-                            // finger touches the screen
-                            tempval.add(new LatLng(latitude, longitude));
-
-                        case MotionEvent.ACTION_MOVE:
-                            // finger moves on the screen
-                            tempval.add(new LatLng(latitude, longitude));
-
-                        case MotionEvent.ACTION_UP:
-                            // finger leaves the screen
-                            Log.d(tag, "Count = " + c);
-                            Draw_Map(tempval);
-                            sendData(new customerDraw(tempval));
-                            tempval.clear();
-                            break;
-                    }
-
-
-                }
-                return true;
-            }
-        });
-        mapFragment.getMapAsync(this);
-/*        if(MApp.whoAmI()==MApp.DRIVER)
-        {
-            worker.schedule(new Runnable()
+            customerCall = (Button) findViewById(R.id.customer_call);
+            fram_map = (FrameLayout) findViewById(R.id.fram_map);
+            btn_draw_State = (Button) findViewById(R.id.btn_draw_State);
+            ((View) btn_draw_State.getParent()).setOnTouchListener(new View.OnTouchListener()
             {
                 @Override
-                public void run()
+                public boolean onTouch(View v, MotionEvent event)
                 {
-
-
-
-
+                    Log.d("Frame", "Touched");
+                    return false;
                 }
-            }, 5, TimeUnit.SECONDS);
-        }*/
+            });
+            val = new ArrayList<>();
+            btn_draw_State.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    // TODO Auto-generated method stub
+                    if (Is_MAP_Moveable != true)
+                    {
+                        Is_MAP_Moveable = true;
+                    } else
+                    {
+                        Is_MAP_Moveable = false;
+                    }
+                }
+            });
+            fram_map.setOnTouchListener(new View.OnTouchListener()
+            {
+                @Override
+                public boolean onTouch(View v, MotionEvent event)
+                {
+                    if (Is_MAP_Moveable == true)
+                    {
+                        return false;
 
+                    } else
+                    {
+
+                        float x = event.getX();
+                        float y = event.getY();
+
+                        int x_co = Math.round(x);
+                        int y_co = Math.round(y);
+
+                        projection = mMap.getProjection();
+                        Point x_y_points = new Point(x_co, y_co);
+
+                        LatLng latLng = mMap.getProjection().fromScreenLocation(x_y_points);
+                        latitude = latLng.latitude;
+
+                        longitude = latLng.longitude;
+
+                        int eventaction = event.getAction();
+                        c++;
+                        switch (eventaction)
+                        {
+                            case MotionEvent.ACTION_DOWN:
+                                // finger touches the screen
+                                tempval.add(new LatLng(latitude, longitude));
+
+                            case MotionEvent.ACTION_MOVE:
+                                // finger moves on the screen
+                                tempval.add(new LatLng(latitude, longitude));
+
+                            case MotionEvent.ACTION_UP:
+                                // finger leaves the screen
+                                Log.d(tag, "Count = " + c);
+                                Draw_Map(tempval);
+                                sendData(new customerDraw(tempval));
+                                tempval.clear();
+                                break;
+                        }
+
+
+                    }
+                    return true;
+                }
+            });
+
+        } else
+        {
+            getLayoutInflater().inflate(R.layout.driver_layout,container);
+            w.loginAsPilot();
+        }
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+
+        this.buildGoogleApiClient();
+        mGoogleApiClient.connect();
+
+        mapFragment.getMapAsync(this);
     }
 
     private synchronized void buildGoogleApiClient()
