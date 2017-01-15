@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import builders.submile.MainActivity;
-import builders.submile.MessageData;
 import builders.submile.gsonUtil;
 
 /**

@@ -1,4 +1,4 @@
-package builders.submile;
+package builders.submile.messaging;
 
 import com.google.android.gms.maps.model.LatLng;
 

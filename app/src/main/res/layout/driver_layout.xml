@@ -56,7 +56,7 @@
                     android:layout_alignStart="@+id/name_id"
                     android:layout_below="@+id/name_id"
                     android:textColor="#FFFFFF"
-                    android:text="#333, 3rd D cross, Mysore Road, Chamrajpet, Bangalore-560018"/>
+                    android:text="Gojek, Tower B, Diamond District, Indranagar, Bangalore - 560018"/>
             </RelativeLayout>
 
 
@@ -99,12 +99,12 @@
         android:layout_height="40dp"
         android:layout_gravity="bottom"
         android:layout_weight="1.7"
-        android:weightSum="1.5"
+        android:weightSum="1.0"
         android:background="#ffffff"
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/send_btn_id"
+            android:id="@+id/delivered_btn_id"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_gravity="center"
@@ -118,18 +118,10 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:text="Call"
-            android:layout_margin="5dp"
-            android:background="@drawable/rounded_button"/>
-        <ImageView
-            android:id="@+id/share_id"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
+            android:id="@+id/call_btn"
+            android:textColor="#FFFFFF"
             android:layout_margin="1dp"
-            android:layout_weight="0.5"
-
-            android:background="#2196f3"
-            android:src="@drawable/share_location"/>
+            android:background="#2196f3"/>
 
 
     </LinearLayout>
