@@ -1,6 +1,8 @@
 package builders.submile;
 
 import android.Manifest;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -17,6 +19,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -38,6 +42,8 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import builders.submile.customLocation.CustomLocationService;
 import builders.submile.customLocation.LocationModel;
+import builders.submile.geofencing.Constants;
+import builders.submile.geofencing.GeofenceTransitionsIntentService;
 import builders.submile.messaging.MApp;
 import builders.submile.messaging.MessageData;
 import builders.submile.messaging.Worker;
