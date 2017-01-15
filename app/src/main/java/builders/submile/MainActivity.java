@@ -36,7 +36,10 @@ import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import builders.submile.customLocation.CustomLocationService;
+import builders.submile.customLocation.LocationModel;
 import builders.submile.messaging.MApp;
+import builders.submile.messaging.MessageData;
 import builders.submile.messaging.Worker;
 
 import static com.google.android.gms.location.LocationServices.FusedLocationApi;
@@ -166,6 +169,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                                 // finger leaves the screen
                                 Log.d(tag, "Count = " + c);
                                 Draw_Map(tempval);
+                                Log.d("Sending",tempval.toString());
                                 sendData(new MessageData("DRAW", tempval));
                                 tempval.clear();
                                 break;
@@ -181,6 +185,25 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         {
             getLayoutInflater().inflate(R.layout.driver_layout, container);
             w.loginAsPilot();
+            ((Button)findViewById(R.id.delivered_btn_id)).setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+                    String jsonString = gsonUtil.tojson(new LocationModel("9972115447","SAVED","Gojek,4th, floor, diamond district, Bangalore - 560018",val));
+                    Log.d("JSON String ",jsonString);
+
+                }
+            });
+            ((Button)findViewById(R.id.call_btn)).setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+                    (new CustomLocationService()).getLocation(MainActivity.this,"9972115447");
+
+                }
+            });
         }
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -216,19 +239,19 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         w.sendMessageToPilot(s);
     }
 
-    public void Draw_MapOnPilot(ArrayList<LatLng> tempval)
+    public void Draw_MapOnPilot(final ArrayList<LatLng> tempval)
     {
 
-        val.addAll(tempval);
-        rectOptions = new PolylineOptions();
-        rectOptions.addAll(val);
-        rectOptions.color(Color.BLUE);
+
         runOnUiThread(new Runnable()
         {
             @Override
             public void run()
             {
-
+                val.addAll(tempval);
+                rectOptions = new PolylineOptions();
+                rectOptions.addAll(val);
+                rectOptions.color(Color.BLUE);
                 mMap.addPolyline(rectOptions);
             }
         });
