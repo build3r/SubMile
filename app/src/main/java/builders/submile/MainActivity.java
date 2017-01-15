@@ -74,6 +74,11 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     Marker customerMarker, driverMarker,pilotMarker;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
+    protected ArrayList<Geofence> mGeofenceList;
+    /**
+     * Used when requesting to add or remove geofences.
+     */
+    private PendingIntent mGeofencePendingIntent;
     LinearLayout container;
 
     @Override
@@ -322,16 +327,30 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         {
             customerMarkerOptions = new MarkerOptions().position(t).title("Mr Shabaz Ahmed").icon(BitmapDescriptorFactory.fromResource(R.mipmap.customer_marker));
             customerMarker = mMap.addMarker(customerMarkerOptions);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(t, 15f));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(t, 17f));
         }
         else
         {
-            customerMarkerOptions = new MarkerOptions().position(new LatLng(12.959399, 77.643374)).title("Mr Shabaz Ahmed").icon(BitmapDescriptorFactory.fromResource(R.mipmap.customer_marker));
+            double lat = 12.959399;
+            double lng = 77.643374;
+            customerMarkerOptions = new MarkerOptions().position(new LatLng(lat, lng)).title("Mr Shabaz Ahmed").icon(BitmapDescriptorFactory.fromResource(R.mipmap.customer_marker));
             customerMarker =  mMap.addMarker(customerMarkerOptions);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(12.959399, 77.643374), 16f));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 16f));
+            mGeofenceList.add(new Geofence.Builder()
+                    // Set the request ID of the geofence. This is a string to identify this
+                    // geofence.
+                    .setRequestId("Diamond District")
+
+                    .setCircularRegion(
+                            lat,
+                            lng,
+                            Constants.GEOFENCE_RADIUS_IN_METERS
+                    )
+                    .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
+                            Geofence.GEOFENCE_TRANSITION_EXIT)
+                    .build());
         }
-
-
     }
 
     @Override
@@ -449,5 +468,22 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+    }
+    private GeofencingRequest getGeofencingRequest() {
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        builder.addGeofences(mGeofenceList);
+        return builder.build();
+    }
+    private PendingIntent getGeofencePendingIntent() {
+        // Reuse the PendingIntent if we already have it.
+        if (mGeofencePendingIntent != null) {
+            return mGeofencePendingIntent;
+        }
+        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
+        // calling addGeofences() and removeGeofences().
+        return PendingIntent.getService(this, 0, intent, PendingIntent.
+                FLAG_UPDATE_CURRENT);
     }
 }
