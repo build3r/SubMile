@@ -30,6 +30,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -42,7 +44,6 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import builders.submile.customLocation.CustomLocationService;
 import builders.submile.customLocation.LocationModel;
-import builders.submile.geofencing.Constants;
 import builders.submile.geofencing.GeofenceTransitionsIntentService;
 import builders.submile.messaging.MApp;
 import builders.submile.messaging.MessageData;
@@ -80,7 +81,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     Marker customerMarker, driverMarker,pilotMarker;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
-    protected ArrayList<Geofence> mGeofenceList;
+    protected ArrayList<Geofence> mGeofenceList = new ArrayList<>();
     /**
      * Used when requesting to add or remove geofences.
      */
@@ -303,7 +304,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
     }
-
+    Circle geoCircle;
     @Override
     public void onMapReady(GoogleMap googleMap)
     {
@@ -342,7 +343,8 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
             customerMarkerOptions = new MarkerOptions().position(new LatLng(lat, lng)).title("Mr Shabaz Ahmed").icon(BitmapDescriptorFactory.fromResource(R.mipmap.customer_marker));
             customerMarker =  mMap.addMarker(customerMarkerOptions);
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 16f));
-            mGeofenceList.add(new Geofence.Builder()
+            double radius = (new GeoLocation(lat,lng)).distanceFrom(new GeoLocation(12.9634162273,77.64166463));
+            /*mGeofenceList.add(new Geofence.Builder()
                     // Set the request ID of the geofence. This is a string to identify this
                     // geofence.
                     .setRequestId("Diamond District")
@@ -350,12 +352,19 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                     .setCircularRegion(
                             lat,
                             lng,
-                            Constants.GEOFENCE_RADIUS_IN_METERS
+                            (float) radius
                     )
                     .setExpirationDuration(Constants.GEOFENCE_EXPIRATION_IN_MILLISECONDS)
                     .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
                             Geofence.GEOFENCE_TRANSITION_EXIT)
-                    .build());
+                    .build());*/
+            CircleOptions circleOptions = new CircleOptions()
+                    .center( new LatLng(lat,lng) )
+                    .radius( 0.45 *1000)
+                    .strokeColor(Color.GREEN)
+                    .fillColor(Color.argb(120,181,230,129));
+
+             geoCircle = mMap.addCircle(circleOptions);
         }
     }
 
@@ -400,7 +409,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStop();
 
     }
-
+    int i = 0 ;
     @Override
     public void onLocationChanged(Location location)
     {
@@ -419,7 +428,9 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 customerMarkerOptions.position(new LatLng(location.getLatitude(), location.getLongitude()));*/
         } else
         {
-
+            i++;
+            if(i>3)
+                geoCircle.remove();
             sendCurrentLocation(new LatLng(location.getLatitude() , location.getLongitude()));
             if (driverMarkerOptions == null)
             {
@@ -448,7 +459,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
     }
-    int i=0;
+
 
     public void sendCurrentLocation(final LatLng l)
     {
